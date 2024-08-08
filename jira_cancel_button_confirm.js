@@ -7,40 +7,99 @@ function getCancelButton() {
  * @returns {boolean}
  */
 function promptHandler(ev) {
-    ev.preventDefault();
+    if ('hasCommentContent' in window && window.hasCommentContent) {
+        ev.preventDefault();
 
-    const response = confirm('Are you sure you want to cancel? You will loose your data.')
+        const response = confirm('Are you sure you want to cancel? You will loose your data.')
 
-    if (!response) {
-        ev.stopImmediatePropagation();
-        ev.stopPropagation();
-        return false;
+        if (!response) {
+            ev.stopImmediatePropagation();
+            ev.stopPropagation();
+            return false;
+        }
+
+        window.hasCommentContent = false;
     }
 
+    window.hasCancelButtonListener = false;
+    window.hasEditableBoxListener = false;
     return true;
 }
 
-function registerCancelButtonListener() {
-  const cancelButton = getCancelButton();
+function handleSaveButtonClick() {
+    window.hasCommentContent = false;
+    window.hasCancelButtonListener = false;
+    window.hasEditableBoxListener = false;
+}
 
-  // if the button already exists, we add the listener on it.
-  if (cancelButton) {
-    console.log('adding event handler on comment button')
-    cancelButton.addEventListener('click', promptHandler)
-  }
+function saveButtonListener() {
+    const saveButton = document.querySelector('[data-testid="comment-save-button"]');
+    if(saveButton) {
+        saveButton.addEventListener('click', handleSaveButtonClick)
+    }
+}
+
+
+function registerCancelButtonListener() {
+    const cancelButton = getCancelButton();
+
+    // if the button already exists, we add the listener on it.
+    if (cancelButton && !window.hasCancelButtonListener) {
+        window.hasCancelButtonListener = true;
+        cancelButton.addEventListener('click', promptHandler)
+    }
+
+    const commentBox = document.querySelector('[data-testid="issue.activity.comment"]')
+    const editableBox = commentBox.querySelector('#ak-editor-textarea');
+
+    if (editableBox && !window.hasEditableBoxListener) {
+
+        editableBox.addEventListener('keydown', () => {
+            window.hasCommentContent = true;
+        })
+
+        window.hasEditableBoxListener = true;
+    }
+
+    saveButtonListener();
+}
+
+function registerCommentBoxListener() {
+    const commentBox = document.querySelector('[data-testid="issue.activity.comment"]');
+
+    if (commentBox && !window.hasCommentBoxMutationHandler) {
+        const commentBoxMutationObserver = new MutationObserver(registerCancelButtonListener)
+
+        commentBoxMutationObserver.observe(commentBox, {childList: true, subtree: true})
+        window.hasCommentBoxMutationHandler = true;
+    }
+}
+
+function registerPortalContainerMutationHandler() {
+    const portalContainer = document.querySelector('.atlaskit-portal-container');
+
+    if (portalContainer && !window.hasPortalContainerMutationHandler) {
+        const commentBoxMutationObserver = new MutationObserver(registerCommentBoxListener)
+
+        commentBoxMutationObserver.observe(portalContainer, {childList: true, subtree: true})
+        window.hasPortalContainerMutationHandler = true;
+    }
+}
+
+
+function registerListeners() {
+    window.hasCancelButtonListener = false;
+    window.hasEditableBoxListener = false;
+    window.hasCommentBoxMutationHandler = false;
+    window.hasPortalContainerMutationHandler = false;
+
+    registerCancelButtonListener();
+
+    registerCommentBoxListener();
+
+    registerPortalContainerMutationHandler();
 }
 
 (function () {
-    console.log('starting jira_cancel_button_prompt')
-
-  registerCancelButtonListener();
-
-    const commentBox = document.querySelector('[data-testid="issue.activity.comment"]');
-
-    if (commentBox) {
-      console.log('adding mutation observer on comment box')
-      const commentBoxMutationObserver = new MutationObserver(registerCancelButtonListener)
-
-      commentBoxMutationObserver.observe(commentBox, { childList: true, subtree: true })
-    }
-})();
+    setTimeout(registerListeners, 5000);
+})()
