@@ -1,5 +1,10 @@
+const SAVE_BUTTON_TEST_ID_SELECTOR = '[data-testid="comment-save-button"]';
+const COMMENT_BOX_TEST_ID_SELECTOR= '[data-testid="issue.activity.comment"]';
+const TEXT_AREA_SELECTOR = '#ak-editor-textarea'
+const PORTAL_CONTAINER_SELECTOR = '.atlaskit-portal-container'
+
 function getCancelButton() {
-    return document.querySelector('[data-testid="comment-save-button"] + button');
+    return document.querySelector(`${SAVE_BUTTON_TEST_ID_SELECTOR} + button`);
 }
 
 /**
@@ -33,7 +38,7 @@ function handleSaveButtonClick() {
 }
 
 function saveButtonListener() {
-    const saveButton = document.querySelector('[data-testid="comment-save-button"]');
+    const saveButton = document.querySelector(SAVE_BUTTON_TEST_ID_SELECTOR);
     if(saveButton) {
         saveButton.addEventListener('click', handleSaveButtonClick)
     }
@@ -49,8 +54,8 @@ function registerCancelButtonListener() {
         cancelButton.addEventListener('click', promptHandler)
     }
 
-    const commentBox = document.querySelector('[data-testid="issue.activity.comment"]')
-    const editableBox = commentBox.querySelector('#ak-editor-textarea');
+    const commentBox = document.querySelector(COMMENT_BOX_TEST_ID_SELECTOR)
+    const editableBox = commentBox.querySelector(TEXT_AREA_SELECTOR);
 
     if (editableBox && !window.hasEditableBoxListener) {
 
@@ -65,7 +70,7 @@ function registerCancelButtonListener() {
 }
 
 function registerCommentBoxListener() {
-    const commentBox = document.querySelector('[data-testid="issue.activity.comment"]');
+    const commentBox = document.querySelector(COMMENT_BOX_TEST_ID_SELECTOR);
 
     if (commentBox && !window.hasCommentBoxMutationHandler) {
         const commentBoxMutationObserver = new MutationObserver(registerCancelButtonListener)
@@ -76,7 +81,7 @@ function registerCommentBoxListener() {
 }
 
 function registerPortalContainerMutationHandler() {
-    const portalContainer = document.querySelector('.atlaskit-portal-container');
+    const portalContainer = document.querySelector(PORTAL_CONTAINER_SELECTOR);
 
     if (portalContainer && !window.hasPortalContainerMutationHandler) {
         const commentBoxMutationObserver = new MutationObserver(registerCommentBoxListener)
