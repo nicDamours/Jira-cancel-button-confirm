@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Jira_cancel_comment_button_confirm",
+  "version": "0.1",
+  "description": "Add a confirm to the cancel button on jira, before deleting the content.",
+  "content_scripts": [
+    {
+      "matches": ["*://*.atlassian.net/jira/*"],
+      "js": ["jira_cancel_button_confirm.js"]
+    }
+  ]
+}
+
